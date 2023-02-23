@@ -1,0 +1,44 @@
+name: Prepare Release
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'The version date YYYY-MM-DD'
+        required: true
+      type:
+        description: 'What type of release is this'
+        required: true
+        default: 'release'
+        type: choice
+        options:
+        - release
+        - rc
+
+jobs:
+  create:
+    name: Prepare Pull Request
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Set git identity
+        uses: fregante/setup-git-user@v1
+      - name: Validate version format
+        run: |
+          [[ "${{ inputs.version }}" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]] || (echo "::error::Version ${{ inputs.version }} not in YYYY-MM-DD format" && exit 1)
+          exit 0
+      - name: Merge stable, but keep master contents
+        run: git merge -s ours origin/stable
+      - name: Create pull request
+        uses: peter-evans/create-pull-request@v4
+        with:
+          branch: ${{ inputs.type }}-${{ inputs.version }}
+          title: Release Preparations for ${{ inputs.type }}-${{ inputs.version }}
+          body: |
+            This merges current master into stable.
+
+            - There are things to do first
+            - I don't know what yet
+
