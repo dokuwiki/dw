@@ -30,9 +30,8 @@ jobs:
 
       - name: Create tag
         uses: actions/github-script@v6
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
         with:
+          github-token: ${{ secrets.RELEASE_TOKEN }}
           script: |
             const {current_version} = process.env;
             github.rest.git.createRef({
