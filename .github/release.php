@@ -15,15 +15,49 @@ class Release extends splitbrain\phpcli\CLI
     {
         $options->setHelp('This tool is used to gather and check data for building a release');
 
-        $options->registerOption('type', 'The type of release to build', null, 'stable|rc');
-        $options->registerOption('date', 'The date to use for the version. Defaults to today', null, 'YYYY-MM-DD');
-        $options->registerOption('name', 'The codename to use for the version. Defaults to the last used one', null, 'codename');
+        $options->registerCommand('new', 'Get environment for creating a new release');
+        $options->registerOption('type', 'The type of release to build', null, 'stable|rc', 'new');
+        $options->registerOption('date', 'The date to use for the version. Defaults to today', null, 'YYYY-MM-DD', 'new');
+        $options->registerOption('name', 'The codename to use for the version. Defaults to the last used one', null, 'codename', 'new');
+
+        $options->registerCommand('current', 'Get environment of the current release');
     }
 
     protected function main(\splitbrain\phpcli\Options $options)
     {
-        $current = $this->getCurrentVersion();
+        switch ($options->getCmd()) {
+            case 'new':
+                $this->prepareNewEnvironment($options);
+                break;
+            case 'current':
+                $this->prepareCurrentEnvironment($options);
+                break;
+            default:
+                echo $options->help();
+        }
+    }
 
+    /**
+     * Prepare environment for the current branch
+     */
+    protected function prepareCurrentEnvironment(\splitbrain\phpcli\Options $options)
+    {
+        $current = $this->getLocalVersion();
+
+        // output to be piped into GITHUB_ENV
+        foreach ($current as $k => $v) {
+            echo "current_$k=$v\n";
+        }
+    }
+
+    /**
+     * Prepare environment for creating a new release
+     */
+    protected function prepareNewEnvironment(\splitbrain\phpcli\Options $options)
+    {
+        $current = $this->getUpstreamVersion();
+
+        // continue if we want to create a new release
         $next = [
             'type' => $options->getOpt('type'),
             'date' => $options->getOpt('date'),
@@ -64,15 +98,25 @@ class Release extends splitbrain\phpcli\CLI
     }
 
     /**
+     * Get current version info from local VERSION file
+     *
+     * @return string[]
+     */
+    protected function getLocalVersion()
+    {
+        return \dokuwiki\Info::parseVersionString(trim(file_get_contents('VERSION')));
+    }
+
+    /**
      * Get current version info from stable branch
      *
      * @return string[]
      * @throws Exception
      */
-    protected function getCurrentVersion()
+    protected function getUpstreamVersion()
     {
         // basic version info
-        $versioninfo = \dokuwiki\Info::parseVersionString(file_get_contents($this->BASERAW . 'VERSION'));
+        $versioninfo = \dokuwiki\Info::parseVersionString(trim(file_get_contents($this->BASERAW . 'VERSION')));
 
         // update version grepped from the doku.php file
         $doku = file_get_contents($this->BASERAW . 'doku.php');

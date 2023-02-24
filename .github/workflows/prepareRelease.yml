@@ -45,7 +45,7 @@ jobs:
 
             -   name: Prepare Environment
                 run: |
-                    php .github/release.php \
+                    php .github/release.php new \
                         --date "${{ inputs.version }}" \
                         --name "${{ inputs.codename }}" \
                         --type "${{ inputs.type }}" \
