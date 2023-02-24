@@ -1,3 +1,7 @@
+# This workflow creates a new tag, builds the release archives and uploads them to GitHub and our server
+# It is triggered by pushing to the stable branch, either manually or by merging a PR created by the
+# release-preparation workflow
+
 name: "Release: Tag, Build & Deploy"
 on:
   push:
@@ -67,7 +71,7 @@ jobs:
         id: release
         uses: softprops/action-gh-release@v1
         with:
-          name: DokuWiki ${{ env.current_raw }} ${{ env.current_update }}
+          name: DokuWiki ${{ env.current_raw }} [${{ env.current_update }}]
           tag_name: release-${{ env.current_version }}
           files: |
             dokuwiki-${{ env.current_file }}.tgz
@@ -86,12 +90,12 @@ jobs:
         run: |
           wget ${{ needs.build.outputs.url }}/dokuwiki-${{ needs.build.outputs.file }}.tgz
 
-#      - name: Setup SSH Key
-#        uses: shimataro/ssh-key-action@v2
-#        with:
-#          key: ${{ secrets.SSH_PRIVATE_KEY }}
-#          # generate with ssh-keyscan -H <server>
-#          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
+      - name: Setup SSH Key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          # generate with ssh-keyscan -H <server>
+          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
 
       - name: Deploy to Server
         run: |

@@ -1,11 +1,12 @@
 <?php
 
-use splitbrain\phpcli\Colors;
-
 if (!defined('DOKU_INC')) define('DOKU_INC', __DIR__ . '/../');
 require_once(DOKU_INC . 'vendor/autoload.php');
 require_once DOKU_INC . 'inc/load.php';
 
+/**
+ * Command Line utility to gather and check data for building a release
+ */
 class Release extends splitbrain\phpcli\CLI
 {
     // base URL to fetch raw files from the stable branch
@@ -139,7 +140,13 @@ class Release extends splitbrain\phpcli\CLI
      */
     protected function getLocalVersion()
     {
-        return \dokuwiki\Info::parseVersionString(trim(file_get_contents('VERSION')));
+        $versioninfo = \dokuwiki\Info::parseVersionString(trim(file_get_contents('VERSION')));
+        $doku = file_get_contents('doku.php');
+        if (!preg_match('/\$updateVersion = "(\d+(\.\d+)?)";/', $doku, $m)) {
+            throw new \Exception('Could not find $updateVersion in doku.php');
+        }
+        $versioninfo['update'] = floatval($m[1]);
+        return $versioninfo;
     }
 
     /**

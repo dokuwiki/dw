@@ -1,3 +1,8 @@
+# This workflow is triggered manually and prepares a new release by creating a pull request
+# All needed info is provided by the user in the workflow_dispatch dialog
+#
+# When the pull request is merged, the release-build workflow will be triggered automatically
+
 name: "Release: Preparation 🚀"
 on:
   workflow_dispatch:
