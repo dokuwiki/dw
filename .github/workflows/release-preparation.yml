@@ -46,6 +46,13 @@ jobs:
               --type "${{ inputs.type }}" \
               >> $GITHUB_ENV
 
+      - name: Check if a tag of the new release already exists
+        run: |
+          if git rev-parse "release-${{ env.next_version }}" >/dev/null 2>&1; then
+            echo "::error::Tag already exists, you may need to build a hotfix instead"
+            exit 1
+          fi
+
       - name: Create merge commit with version info
         run: |
           git merge -s ours origin/stable
