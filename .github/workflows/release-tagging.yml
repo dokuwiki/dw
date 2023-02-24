@@ -19,6 +19,8 @@ jobs:
       - name: Check if a tag already exists
         run: |
           if git rev-parse "release-${{ env.current_version }}" >/dev/null 2>&1; then
+            echo "New version: ${{ env.current_version }}"
+          else
             echo "::error::Tag already exists, be sure to update the VERSION file for a hotfix"
             exit 1
           fi
