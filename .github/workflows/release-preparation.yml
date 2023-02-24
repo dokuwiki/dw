@@ -64,7 +64,11 @@ jobs:
           destination_branch: stable
           pr_title: Release Preparations for ${{ env.next_raw }}
           pr_body: |
-            With accepting this PR, a the stable branch will be updated.
+            With accepting this PR, a the stable branch will be updated and the whole release and
+            deployment process will be triggered.
+
+            If you're not happy with the contents of this PR, please close it, fix stuff and trigger
+            the workflow again.
 
             * ${{ env.current_raw }} -> ${{ env.next_raw }}
             * Update Version ${{ env.current_update }} -> ${{ env.next_update }}
@@ -72,15 +76,14 @@ jobs:
             Before merging this PR, make sure that:
 
             - [ ] Ensure all tests pass
-            - [ ] If this is a release, make sure you copied merged stable into old-stable
+            - [ ] If this is a release, make sure you merged `stable` into `old-stable` first
             - [ ] Check that a meaningful [changelog](https://www.dokuwiki.org/changes) exists
 
-            After merging, the release workflow will be triggered automatically. It will create the
-            appropriate tag, build a tgz and copy it to our download server.
+            After merging, the release workflow will be triggered automatically.
 
             After this is done, you need to do the following things manually:
 
             - [ ] Update the [version symlinks](https://download.dokuwiki.org/admin/)
             - [ ] Update the update message system
-            - [ ] Announce the release on the mailinglist, forum, IRC, social media, etc.
+            - [ ] Announce the release on the mailing list, forum, IRC, social media, etc.
 
