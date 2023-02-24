@@ -1,4 +1,4 @@
-name: "Release: 2. Automatic Tagging"
+name: "Release: Tag, Build & Deploy"
 on:
   push:
     branches:
@@ -64,6 +64,7 @@ jobs:
           mv "dokuwiki-${{ env.current_version }}.zip" ${{ github.event.repository.name }}/
 
       - name: Release to Github
+        id: release
         uses: softprops/action-gh-release@v1
         with:
           name: DokuWiki ${{ env.current_raw }} ${{ env.current_update }}
@@ -71,7 +72,19 @@ jobs:
           files: |
             dokuwiki-${{ env.current_file }}.tgz
             dokuwiki-${{ env.current_file }}.zip
+    outputs:
+      version: ${{ env.current_version }}
+      file: ${{ env.current_file }}
+      url: ${{ steps.release.outputs.url }}
 
+  deploy:
+    name: Deploy Release
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download
+        run: |
+          wget ${{ needs.build.outputs.url }}/dokuwiki-${{ needs.build.outputs.file }}.tgz
 
 #      - name: Setup SSH Key
 #        uses: shimataro/ssh-key-action@v2
@@ -79,8 +92,8 @@ jobs:
 #          key: ${{ secrets.SSH_PRIVATE_KEY }}
 #          # generate with ssh-keyscan -H <server>
 #          known_hosts: ${{ secrets.SSH_KNOWN_HOSTS }}
-#
-#      - name: Deploy to Server
-#        run: |
-#          scp "dokuwiki-${{ steps.get_version.outputs.VERSION }}.tgz" ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:htdocs/src/dokuwiki/
-#          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd htdocs/src/dokuwiki/ && tar -xzvf dokuwiki-${{ steps.get_version.outputs.VERSION }}.tgz"
+
+      - name: Deploy to Server
+        run: |
+          scp "dokuwiki-${{ needs.build.outputs.file }}.tgz" ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }}:htdocs/src/dokuwiki/
+          ssh ${{ secrets.SSH_USER }}@${{ secrets.SSH_HOST }} "cd htdocs/src/dokuwiki/ && tar -xzvf dokuwiki-${{ needs.build.outputs.file }}.tgz"

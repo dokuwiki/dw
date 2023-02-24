@@ -11,6 +11,21 @@ class Release extends splitbrain\phpcli\CLI
     // base URL to fetch raw files from the stable branch
     protected $BASERAW = 'https://raw.githubusercontent.com/splitbrain/dokuwiki/stable/';
 
+    /** @inheritdoc */
+    public function __construct($autocatch = true)
+    {
+        parent::__construct($autocatch);
+
+        $this->error(print_r($_ENV, true));
+
+        // when running on a clone, use the correct base URL
+        $repo = getenv('GITHUB_REPOSITORY');
+        if ($repo) {
+            $this->BASERAW = 'https://raw.githubusercontent.com/' . $repo . '/stable/';
+        }
+    }
+
+
     protected function setup(\splitbrain\phpcli\Options $options)
     {
         $options->setHelp('This tool is used to gather and check data for building a release');
