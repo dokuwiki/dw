@@ -43,6 +43,8 @@ class Release extends splitbrain\phpcli\CLI
     protected function prepareCurrentEnvironment(\splitbrain\phpcli\Options $options)
     {
         $current = $this->getLocalVersion();
+        // we name files like the string in the VERSION file, with rc at the front
+        $current['file'] = ($current['type'] === 'rc' ? 'rc' : '') . $current['date'] . $current['hotfix'];
 
         // output to be piped into GITHUB_ENV
         foreach ($current as $k => $v) {
@@ -101,7 +103,10 @@ class Release extends splitbrain\phpcli\CLI
         }
 
         $next['version'] = $next['date'] . ($next['type'] === 'rc' ? 'rc' : $next['hotfix']);
-        $next['raw'] = ($next['type'] === 'rc' ? 'rc' : $next['hotfix']) . $next['date'] . ' "' . $next['codename'] . '"';
+        $next['raw'] = ($next['type'] === 'rc' ? 'rc' : '') .
+            $next['date'] .
+            $next['hotfix'] .
+            ' "' . $next['codename'] . '"';
 
         // output to be piped into GITHUB_ENV
         foreach ($current as $k => $v) {
