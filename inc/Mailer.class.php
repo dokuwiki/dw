@@ -52,6 +52,7 @@ class Mailer {
 
         $listid = implode('.', array_reverse(explode('/', DOKU_BASE))).$server;
         $listid = strtolower(trim($listid, '.'));
+        $messageid = uniqid(mt_rand(), true) . "@$server";
 
         $this->allowhtml = (bool)$conf['htmlmail'];
 
@@ -66,6 +67,7 @@ class Mailer {
         $this->setHeader('X-Auto-Response-Suppress', 'OOF');
         $this->setHeader('List-Id', $conf['title'].' <'.$listid.'>');
         $this->setHeader('Date', date('r'), false);
+        $this->setHeader('Message-Id', "<$messageid>");
 
         $this->prepareTokenReplacements();
     }
@@ -636,8 +638,8 @@ class Mailer {
 
         $ip   = clientIP();
         $cip  = gethostsbyaddrs($ip);
-        $name = isset($INFO) ? $INFO['userinfo']['name'] : '';
-        $mail = isset($INFO) ? $INFO['userinfo']['mail'] : '';
+        $name = $INFO['userinfo']['name'] ?? '';
+        $mail = $INFO['userinfo']['mail'] ?? '';
 
         $this->replacements['text'] = array(
             'DATE' => dformat(),

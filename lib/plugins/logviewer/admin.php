@@ -55,13 +55,13 @@ class admin_plugin_logviewer extends DokuWiki_Admin_Plugin
     {
         global $ID;
 
-        $form = new dokuwiki\Form\Form(['method'=>'GET']);
+        $form = new dokuwiki\Form\Form(['method' => 'GET']);
         $form->setHiddenField('do', 'admin');
         $form->setHiddenField('page', 'logviewer');
         $form->setHiddenField('facility', $this->facility);
-        $form->addTextInput('date',$this->getLang('date'))
-             ->attr('type','date')->val($this->date)->addClass('quickselect');
-        $form->addButton('submit','>')->attr('type','submit');
+        $form->addTextInput('date', $this->getLang('date'))
+            ->attr('type', 'date')->val($this->date)->addClass('quickselect');
+        $form->addButton('submit', '>')->attr('type', 'submit');
         echo $form->toHTML();
 
         echo '<ul class="tabs">';
@@ -98,18 +98,19 @@ class admin_plugin_logviewer extends DokuWiki_Admin_Plugin
         for ($i = 0; $i < $cnt; $i++) {
             $line = $lines[$i];
 
-            if ($line[0] === ' ' && $line[1] === ' ') {
+            if (substr($line, 0, 2) === '  ') {
                 // lines indented by two spaces are details, aggregate them
                 echo '<dd>';
-                while ($line[0] === ' ' && $line[1] === ' ') {
+                while (substr($line, 0, 2) === '  ') {
                     echo hsc(substr($line, 2)) . '<br />';
-                    $line = $lines[++$i];
+                    $i++;
+                    $line = $lines[$i] ?? '';
                 }
                 echo '</dd>';
                 $i -= 1; // rewind the counter
             } else {
                 // other lines are actual log lines in three parts
-                list($dt, $file, $msg) = explode("\t", $line, 3);
+                list($dt, $file, $msg) = sexplode("\t", $line, 3, '');
                 echo '<dt>';
                 echo '<span class="datetime">' . hsc($dt) . '</span>';
                 echo '<span class="log">';
