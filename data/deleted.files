@@ -935,3 +935,4 @@ lib/images/toolbar/list.png
 lib/images/toolbar/list_ul.png
 lib/images/toolbar/rule.png
 lib/tpl/default/images/interwiki.png
+.github/version.php
