@@ -29,9 +29,8 @@ jobs:
 
       - name: Create tag
         uses: actions/github-script@v6
-        env:
-          # we need a privileged token to write the tag despite the tag protection
-          GITHUB_TOKEN: ${{ secrets.RELEASE_TOKEN }}
+        permissions:
+          contents: write
         with:
           script: |
             const {current_version} = process.env;
