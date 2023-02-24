@@ -9,6 +9,7 @@ on:
         type: choice
         options:
           - stable
+          - hotfix
           - rc
       codename:
         description: 'The codename for this release, empty for same as last'
@@ -83,7 +84,7 @@ jobs:
             Before merging this PR, make sure that:
 
             - [ ] Ensure all tests pass
-            - [ ] If this is a release, make sure you merged `stable` into `old-stable` first
+            - [ ] If this is a new stable release, make sure you merged `stable` into `old-stable` first
             - [ ] Check that a meaningful [changelog](https://www.dokuwiki.org/changes) exists
 
             After merging, the release workflow will be triggered automatically.

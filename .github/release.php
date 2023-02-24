@@ -16,7 +16,7 @@ class Release extends splitbrain\phpcli\CLI
         $options->setHelp('This tool is used to gather and check data for building a release');
 
         $options->registerCommand('new', 'Get environment for creating a new release');
-        $options->registerOption('type', 'The type of release to build', null, 'stable|rc', 'new');
+        $options->registerOption('type', 'The type of release to build', null, 'stable|hotfix|rc', 'new');
         $options->registerOption('date', 'The date to use for the version. Defaults to today', null, 'YYYY-MM-DD', 'new');
         $options->registerOption('name', 'The codename to use for the version. Defaults to the last used one', null, 'codename', 'new');
 
@@ -62,14 +62,24 @@ class Release extends splitbrain\phpcli\CLI
             'type' => $options->getOpt('type'),
             'date' => $options->getOpt('date'),
             'codename' => $options->getOpt('name'),
+            'hotfix' => '',
         ];
         if (!$next['type']) $next['type'] = 'stable';
         if (!$next['date']) $next['date'] = date('Y-m-d');
         if (!$next['codename']) $next['codename'] = $current['codename'];
         $next['codename'] = ucwords(strtolower($next['codename']));
 
-        if (!in_array($next['type'], ['stable', 'rc'])) {
+        if (!in_array($next['type'], ['stable', 'hotfix', 'rc'])) {
             throw new \splitbrain\phpcli\Exception('Invalid release type, use release or rc');
+        }
+
+        if ($next['type'] === 'hotfix') {
+            $next['update'] = floatval($current['update']) + 0.1;
+            $next['codename'] = $current['codename'];
+            $next['date'] = $current['date'];
+            $next['hotfix'] = $this->increaseHotfix($current['hotfix']);
+        } else {
+            $next['update'] = intval($current['update']) + 1;
         }
 
         if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $next['date'])) {
@@ -80,13 +90,18 @@ class Release extends splitbrain\phpcli\CLI
             throw new \splitbrain\phpcli\Exception('Date must be equal or later than the last release');
         }
 
-        if ($current['type'] === 'stable' && $current['codename'] == $next['codename']) {
+        if ($current['type'] === 'rc' && $next['type'] === 'hotfix') {
+            throw new \splitbrain\phpcli\Exception(
+                'Cannot create hotfixes for release candidates, create a new RC instead'
+            );
+        }
+
+        if ($current['type'] === 'stable' && $next['type'] !== 'hotfix' && $current['codename'] === $next['codename']) {
             throw new \splitbrain\phpcli\Exception('Codename must be different from the last release');
         }
 
-        $next['update'] = intval($current['update']) + 1;
-        $next['version'] = $next['date'] . ($next['type'] === 'rc' ? 'rc' : '');
-        $next['raw'] = ($next['type'] === 'rc' ? 'rc' : '') . $next['date'] . ' "' . $next['codename'] . '"';
+        $next['version'] = $next['date'] . ($next['type'] === 'rc' ? 'rc' : $next['hotfix']);
+        $next['raw'] = ($next['type'] === 'rc' ? 'rc' : $next['hotfix']) . $next['date'] . ' "' . $next['codename'] . '"';
 
         // output to be piped into GITHUB_ENV
         foreach ($current as $k => $v) {
@@ -128,7 +143,19 @@ class Release extends splitbrain\phpcli\CLI
         return $versioninfo;
     }
 
-
+    /**
+     * Increase the hotfix letter
+     *
+     * (max 26 hotfixes)
+     *
+     * @param string $hotfix
+     * @return string
+     */
+    protected function increaseHotfix($hotfix)
+    {
+        if (empty($hotfix)) return 'a';
+        return substr($hotfix, 0, -1) . chr(ord($hotfix) + 1);
+    }
 }
 
 (new Release())->run();

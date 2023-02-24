@@ -47,7 +47,7 @@ jobs:
         run: |
           php .github/release.php current >> $GITHUB_ENV
 
-      - name: Build TGZ
+      - name: Build Archives
         run: |
           rm -rf .gitignore
           rm -rf .git
@@ -65,6 +65,7 @@ jobs:
           rm -rf "dokuwiki-${{ env.current_version }}"
           mkdir ${{ github.event.repository.name }}
           mv "dokuwiki-${{ env.current_version }}.tgz" ${{ github.event.repository.name }}/
+          mv "dokuwiki-${{ env.current_version }}.zip" ${{ github.event.repository.name }}/
 
       - name: Release
         uses: softprops/action-gh-release@v1
