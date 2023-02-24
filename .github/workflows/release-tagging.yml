@@ -37,6 +37,7 @@ jobs:
 
   build:
     name: Build Release
+    needs: tag
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -58,8 +59,10 @@ jobs:
           mkdir -p data/pages/playground
           echo "====== PlayGround ======" > data/pages/playground/playground.txt
           cd ..
+          mv dw dokuwiki # FIXME remove this line when using proper repo
           mv dokuwiki "dokuwiki-${{ env.current_version }}"
           tar -czvf "dokuwiki-${{ env.current_version }}.tgz" dokuwiki-${{ env.current_version }}
+          zip -r "dokuwiki-${{ env.current_version }}.zip" dokuwiki-${{ env.current_version }}
           rm -rf "dokuwiki-${{ env.current_version }}"
           mkdir dokuwiki
           mv "dokuwiki-${{ env.current_version }}.tgz" dokuwiki/
@@ -67,8 +70,11 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          name: DokuWiki ${{ env.current_raw }} ${{ env.current_update }}
+          tag_name: release-${{ env.current_version }}
           files: |
             dokuwiki-${{ env.current_version }}.tgz
+            dokuwiki-${{ env.current_version }}.zip
 
 
 #      - name: Setup SSH Key
