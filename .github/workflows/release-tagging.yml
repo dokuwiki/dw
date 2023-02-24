@@ -12,14 +12,16 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: 8.1
-
       - name: Prepare Environment
         run: |
           php .github/release.php current >> $GITHUB_ENV
+
+      - name: Check if a tag already exists
+        run: |
+          if git rev-parse "release-${{ env.current_version }}" >/dev/null 2>&1; then
+            echo "::error::Tag already exists, be sure to update the VERSION file for a hotfix"
+            exit 1
+          fi
 
       - name: Create tag
         uses: actions/github-script@v6
