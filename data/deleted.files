@@ -935,3 +935,5 @@ lib/images/toolbar/list.png
 lib/images/toolbar/list_ul.png
 lib/images/toolbar/rule.png
 lib/tpl/default/images/interwiki.png
+inc/lang/de/showrev.txt
+inc/lang/de/uploadmail.txt
